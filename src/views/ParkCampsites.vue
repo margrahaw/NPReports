@@ -1,6 +1,8 @@
 <template>
   <div class="parkCampsites">
-    {{ campgrounds[0] }}
+    {{ campgrounds[0].name }}
+    <v-divider />
+    {{ campgrounds[0].description }}
   </div>
 </template>
 

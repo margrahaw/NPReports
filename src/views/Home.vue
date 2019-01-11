@@ -36,34 +36,18 @@
           </v-data-table>
         </v-card>
       </template>
-      
+      {{ filteredStates }}
+      {{ stateChartData.data.labels }}
       {{ info[1]}}
-      <!-- <section v-if="errored">
-        <p>We're sorry, we're not able to retrieve this information at the moment, please try back later</p>
-      </section>
-
-      <section v-else>
-        <div v-if="loading">Loading...</div>
-        <div
-          v-else
-          v-for="currency in info"
-          class="currency"
-          v-bind:key="currency.name"
-        >
-          {{ currency.description }}:
-          <span class="lighten">
-            <span v-html="currency.symbol"></span>{{ currency.rate_float | currencydecimal }}
-          </span>
-        </div>
-      </section> -->
-      <!-- <canvas id="planet-chart"></canvas> -->
+      <canvas id="state-chart"></canvas>
+      <canvas id="planet-chart"></canvas>
     </v-container>
   </div>  
 </template>
 
 <script>
-// import Chart from 'chart.js'
-// import planetChartData from './chart-data.js'
+import Chart from 'chart.js'
+import PlanetChartData from '../chart-data.js'
 import axios from 'axios'
 import ParkInfo from '../components/ParkInfo.vue'
 
@@ -74,7 +58,42 @@ export default {
   },
   data () {
     return {
-    //  planetChartData: planetChartData,
+      planetChartData: PlanetChartData,
+      stateChartData: {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Parks per State',
+              type: 'bar',
+              data: [25, 90],
+              backgroundColor: [
+                'rgba(54,73,93,.5)',
+                'rgba(54,73,93,.5)',
+                'rgba(54,73,93,.5)',
+              ],
+              borderColor: [
+                '#36495d',
+                '#36495d',
+                '#36495d',
+              ],
+              borderWidth: 3,
+            }
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            yAxis: [{
+              ticks: {
+                beginAtZero: true,
+                padding: 25,
+              }
+            }]
+          }
+        }
+      },
       search: '',
       headers: [
         {
@@ -92,6 +111,7 @@ export default {
         },
       ],
       info: [],
+      stateInfo: [],
       loading: true,
       errored: false,
     }
@@ -99,46 +119,69 @@ export default {
 
   filters: {
 
-    currencydecimal (value) {
-      return value.toFixed(2)
-    }
-  },
-
-  computed: {
-    filteredParks() {
-      if (!this.info) return [];
-
-      return this.info.filter(park => park.designation == "National Park")
-    }
-  },
-
-  methods: {
-    showParkInfo(fullName) {
-
-    }
-    // createChart(chartId, chartData) {
-    //   const ctx = document.getElementById(chartId);
-    //   const myChart = new Chart(ctx, {
-    //     type: chartData.type,
-    //     data: chartData.data,
-    //     options: chartData.options,
-    //   });
+    // currencydecimal (value) {
+    //   return value.toFixed(2)
     // }
   },
 
-  created() {
-    // this.createChart('planet-chart', this.planetChartData);
-    axios
+  mounted() {
+    this.getParkInfo();
+    this.createChart('planet-chart', this.planetChartData);
+    this.createChart('state-chart', this.stateChartData);
+  },
+
+  methods: {
+    getParkInfo() {
+      axios
       .get('https://developer.nps.gov/api/v1/parks?&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
       .then(response => {
-          this.info = response.data.data
+          const states = [...new Set(response.data.data.map(state => state.states))];
+          // const countedStates = states.reduce(function(allStates, state){
+          //   if (state in allStates) {
+          //     allStates[state]++;
+          //   }
+          //   else {
+          //     allStates[state] = 1;
+          //   }
+          //   return allStates;
+          // });
+          this.info = response.data.data;
+          this.stateChartData.data.labels = states.sort()
       })
       .catch(error => {
         console.log(error)
         this.errored = true
       })
       .finally(() => this.loading = false)
-  }
+    },
+
+    createChart(chartId, chartData) {
+      console.log("chart data", chartData);
+      const ctx = document.getElementById(chartId);
+      const myChart = new Chart(ctx, {
+        type: chartData.type,
+        data: chartData.data,
+        options: chartData.options,
+      });
+    },
+  },
+
+  computed: {
+    filteredParks() {
+      if (!this.info) return [];
+      return this.info.filter(park => park.designation == "National Park")
+    },
+    filteredStates() {
+      if (!this.info) return [];
+      var states =  this.info.map(state => state.states).sort();
+      var stateCount = Object.create(null);
+      states.forEach(state => {
+        stateCount[state] = stateCount[state] ? stateCount[state] + 1 : 1;
+      });
+      return stateCount
+    },
+  },
+
 }
 </script>
 
