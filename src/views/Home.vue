@@ -8,7 +8,7 @@
       <p class="font-weight-thin font-italic mt-3">Doesn't include parks in American Samoa or US Virgin Islands</p>
     </div>  
     <div class="mt-5">
-      <h2>List of all National Parks</h2>
+      <h2 class="mb-2">List of all National Parks</h2>
       <v-card>
         <v-card-title>
           <v-text-field
@@ -38,6 +38,10 @@
         </v-data-table>
       </v-card>
     </div>
+    <div class="mt-5">
+      <h2 class="mb-2">Campsites within National Parks</h2>
+      <campsites :parkCodes="parkCodes"/>
+    </div>
     </v-container>
   </div>
 </template>
@@ -47,12 +51,14 @@ import Chart from 'chart.js'
 import axios from 'axios'
 import ParkInfo from '../components/ParkInfo.vue'
 import Visualization from '../components/Visualization.vue'
+import Campsites from '../components/Campsites.vue'
 
 export default {
   name: 'home',
   components: {
     ParkInfo,
-    Visualization
+    Visualization,
+    Campsites
   },
   data () {
     return {
@@ -76,6 +82,7 @@ export default {
       stateInfo: [],
       loading: true,
       errored: false,
+      parkCodes: [],
     }
   },
 
@@ -87,7 +94,12 @@ export default {
     getParkInfo() {
         axios.get('https://developer.nps.gov/api/v1/parks?limit=496&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
           .then(response => {
-            this.info = response.data.data
+            let results = response.data.data;
+            let filteredResults = results.filter(np => np.designation == 'National Park' || np.designation == 'National Park & Preserve' || np.designation == 'National and State Park')
+            let parkCodes = filteredResults.map(parkcode => parkcode.parkCode).filter((value, index, self) => { return self.indexOf(value) === index}).sort();
+            this.info = filteredResults;
+            this.parkCodes = parkCodes;
+            console.log("park codes", parkCodes)
         })
         .catch(error => {
           console.log(error)
