@@ -21,16 +21,19 @@
     },
     methods: {
       fillData() {
-        axios.get('https://developer.nps.gov/api/v1/parks?&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
+        axios.get('https://developer.nps.gov/api/v1/parks?limit=496&&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
           .then(response => {
             let results = response.data.data
-            let parkresult = results.map(state => state.states).sort();
-            var counts = {};
-            parkresult.forEach(function(x) {
-              counts[x] = (counts[x] || 0) + 1;
+            let filteredResults = results.filter(np => np.designation == 'National Park' || np.designation == 'National Park & Preserve' || np.designation == 'National and State Park')
+            let parkresult = filteredResults.map(state => state.states).sort();
+            let sorted_states = parkresult.map(state => state.split(',')).reduce((a, b) => a.concat(b));
+            
+            var count = {};
+            sorted_states.forEach(function(x) {
+              count[x] = (count[x] || 0) + 1;
             });
-            this.states = Object.keys(counts);
-            this.stateParkCount = Object.values(counts);
+            this.states = Object.keys(count);
+            this.stateParkCount = Object.values(count);
             this.datacollection = {
               labels: this.states,
               datasets: [
