@@ -40,7 +40,7 @@
     </div>
     <div class="mt-5">
       <h2 class="mb-2">Campsites within National Parks</h2>
-      <campsites :parkCodes="parkCodes"/>
+      <campsites :parkCodes="parkStateMatch" />
     </div>
     </v-container>
   </div>
@@ -92,26 +92,32 @@ export default {
 
   methods: {
     getParkInfo() {
-        axios.get('https://developer.nps.gov/api/v1/parks?limit=496&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
+        axios.get('https://developer.nps.gov/api/v1/parks?limit=200&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
           .then(response => {
             let results = response.data.data;
             let filteredResults = results.filter(np => np.designation == 'National Park' || np.designation == 'National Park & Preserve' || np.designation == 'National and State Park')
-            let parkCodes = filteredResults.map(parkcode => parkcode.parkCode).filter((value, index, self) => { return self.indexOf(value) === index}).sort();
             this.info = filteredResults;
-            this.parkCodes = parkCodes;
-            console.log("park codes", parkCodes)
         })
         .catch(error => {
           console.log(error)
         })
       },
+      
   },
 
   computed: {
     filteredParks(){
       if (!this.info) return [];
       return this.info.filter(park => park.designation == 'National Park' || park.designation == 'National Park & Preserve' || park.designation == 'National and State Park')
-    }
+    },
+    parkStateMatch() {
+      const codes = ['parkCode', 'fullName', 'states'];
+      let parkCodes = [];
+      this.info.forEach(function(park) {
+        parkCodes.push(Object.keys(park).filter(key => codes.includes(key)).reduce((obj, key) => { obj[key] = park[key]; return obj}, {}));
+      });
+      return parkCodes;
+    },
   },
 
 }
