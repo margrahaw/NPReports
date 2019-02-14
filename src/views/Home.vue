@@ -39,7 +39,7 @@
       </v-card>
     </div>
     <div class="mt-5">
-      <h2 class="mb-2">Campsites within National Parks</h2>
+      <h2 class="mb-2">National Park Campgrounds</h2>
       <campsites :parkCodes="parkStateMatch" />
     </div>
     </v-container>

@@ -1,6 +1,7 @@
 # npreports
 
-> A Vue.js project
+> A Vue.js project utilizing Chart.js. The statistics are from the National Park Service API.
+The information provided includes number of parks per state displayed in a bar chart, list of all national parks in a sortable table, and campground information. 
 
 ## Build Setup
 
