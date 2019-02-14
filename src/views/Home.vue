@@ -92,7 +92,7 @@ export default {
 
   methods: {
     getParkInfo() {
-        axios.get('https://developer.nps.gov/api/v1/parks?limit=200&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
+        axios.get('https://developer.nps.gov/api/v1/parks?limit=450&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
           .then(response => {
             let results = response.data.data;
             let filteredResults = results.filter(np => np.designation == 'National Park' || np.designation == 'National Park & Preserve' || np.designation == 'National and State Park')

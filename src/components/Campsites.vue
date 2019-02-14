@@ -1,6 +1,5 @@
 <template>
   <div class="campsites">
-    {{ getStates }}
     <div class="d-flex justify-between align-center mb-3">
       <v-btn @click="all">Show All</v-btn>
       <v-btn @click="none">Collapse All</v-btn>
@@ -11,10 +10,11 @@
       expand
     >
       <v-expansion-panel-content
-        v-for="(item,i) in campgrounds"
+        v-for="(item,i) in getStates"
         :key="i"
       >
-        <div slot="header">{{item.name}} | 
+        <div slot="header"><span class="font-weight-bold">{{item.name}}</span> | {{item.state}}
+          <span v-show="!item.state" class="font-italic">location not available</span>
         </div>
         <v-card>
           <v-card-text>
@@ -25,6 +25,7 @@
           <v-card-text>
             <p>Regulations</p>
             {{ item.regulationsOverview}}
+            <span v-show="!item.regulationsOverview" class="font-italic">no information available</span>
           </v-card-text>
         </v-card>
       </v-expansion-panel-content>
@@ -74,39 +75,19 @@ export default {
     // Reset the panel
     none () {
       this.panel = []
-    }
-    
-  },
-
-  created() {
-    // axios.get('https://developer.nps.gov/api/v1/campgrounds?&api_key=noz5ln8JUoAH3kv8uCu3qAYy7ZVpLsKx96u6G5Qr')
-    //   .then(response => {
-    //     let results = response.data.data.filter((n) => n.name.length > 2)
-    //     let filteredResults = results.filter(function(e) { 
-    //       return this.indexOf(e) < 0;
-    //     }, this.parkCodes );
-    //     console.log('yo');
-    //     //var fds = parkCodes.map(x => Object.assign(x, filteredResults.find(y => y.parkCode == x.parkCode)));
-    //     //console.log('fds', fds[0]);
-    //     let filterParkNames = filteredResults.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-    //     this.campgrounds = filteredResults;
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //     this.errored = true
-    //   })
-    //   .finally(() => this.loading = false)
+    },
   },
 
   computed: {
     getStates() {
       var fds = this.campgrounds.map(park => {
-        let pc = park.parkCode;
-        let stateCode = this.parkCodes.find(x => x.parkCode == pc);
-        park.state = stateCode;
+        let stateCode = this.parkCodes.find(x => x.parkCode == park.parkCode);
+        if (stateCode)
+          park.state = stateCode.fullName + ', ' + stateCode.states;
         return park;
       });
-      console.log('fds', this.campgrounds[0]);
+      console.log("first park", this.campgrounds[0]);
+      return this.campgrounds;
     },
     
   }
